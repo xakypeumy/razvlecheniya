@@ -53,7 +53,7 @@ project/
 ├── database.db
 ├── requirements.txt
 └── README.md
-
+```
 ---
 
 ## 👨‍💻 Авторы
