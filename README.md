@@ -26,7 +26,6 @@
 - Python 3
 - Flask
 - Flask-Login
-- Flask-WTF (по необходимости)
 
 ### Frontend
 - HTML5
