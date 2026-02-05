@@ -57,7 +57,7 @@ project/
 ---
 
 ## 👨‍💻 Авторы
-Xakypeumy 
-GitHub: https://github.com/Xakypeumy
-tyfvute
-GitHub: https://github.com/tyfvute
+Xakypeumy <br>
+GitHub: https://github.com/Xakypeumy<br>
+tyfvute<br>
+GitHub: https://github.com/tyfvute<br>
