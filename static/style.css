@@ -1,15 +1,259 @@
-body (
+:root {
+    --bg-main: #1a1c1e;
+    --bg-side: #111315;
+    --bg-card: #25282c;
+    --accent: #7aa2f7;
+    --text-white: #eeeeee;
+    --text-gray: #9ba1a6;
+    --radius: 20px;
+}
+
+* {
     margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Segoe UI', sans-serif;
+}
+
+body {
+    background-color: var(--bg-main);
+    color: var(--text-white);
     height: 100vh;
+    overflow: hidden;
+}
+
+.app-layout {
+    display: grid;
+    grid-template-columns: 220px 1fr;
+    grid-template-rows: 1fr 110px;
+    height: 100vh;
+}
+
+/* Боковое меню */
+.side-menu {
+    background-color: var(--bg-side);
+    padding: 30px 20px;
+}
+
+.brand {
+    font-weight: 800;
+    font-size: 20px;
+    color: var(--accent);
+    margin-bottom: 40px;
+}
+
+.nav-links {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.nav-links a {
+    text-decoration: none;
+    color: var(--text-gray);
+    padding: 12px 15px;
+    border-radius: var(--radius);
+    transition: 0.2s;
+}
+
+.nav-links a.active, .nav-links a:hover {
+    background-color: var(--bg-card);
+    color: var(--text-white);
+}
+
+/* Контент */
+.content-area {
+    padding: 40px;
+    overflow-y: auto;
+}
+
+.header-simple {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 30px;
+}
+
+.user-badge {
+    background: var(--bg-card);
+    padding: 8px 20px;
+    border-radius: 30px;
+}
+
+.cards-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: 25px;
+}
+
+.music-card {
+    background-color: var(--bg-card);
+    padding: 16px;
+    border-radius: var(--radius);
+    cursor: pointer;
+    transition: 0.3s ease;
+}
+
+.music-card:hover {
+    background-color: #2d3136;
+    transform: translateY(-5px);
+}
+
+.image-box {
+    width: 100%;
+    aspect-ratio: 1;
+    border-radius: calc(var(--radius) - 5px);
+    margin-bottom: 15px;
+    object-fit: cover;
+    display: block;
+}
+
+/* ПЛЕЕР */
+.bottom-player {
+    grid-column: 1 / 3;
+    background-color: var(--bg-side);
+    border-top: 1px solid #2a2d31;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-family: Arial, sans-serif;
-    background-color: #0f172a;
-    color: #e5e7eb;
-)
+    gap: 80px;
+    padding: 0 40px;
+}
 
-h1 (
-    font-size: 32px;
-    font-weight: normal;
-)
+.player-controls-left {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+.nav-btn {
+    background: none;
+    border: none;
+    color: white;
+    font-size: 18px;
+    cursor: pointer;
+    opacity: 0.7;
+    transition: 0.2s;
+}
+
+.nav-btn:hover { opacity: 1; }
+
+.play-circle {
+    background-color: white;
+    color: black;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    border: none;
+    cursor: pointer;
+    font-size: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.player-center-info {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    min-width: 300px;
+}
+
+.track-now {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.small-img {
+    width: 40px;
+    height: 40px;
+    border-radius: 8px;
+    object-fit: cover;
+}
+
+.t-title { font-weight: 600; font-size: 14px; }
+.t-sub { color: var(--text-gray); font-size: 12px; }
+
+.timeline-wrap {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+}
+
+.bar-bg {
+    height: 4px;
+    background-color: #3b4252;
+    flex-grow: 1;
+    border-radius: 10px;
+    position: relative;
+}
+
+.bar-fill {
+    height: 100%;
+    background-color: var(--accent);
+    border-radius: 10px;
+}
+
+.time { font-size: 11px; color: var(--text-gray); }
+
+/* Правая часть: Звук (открывается ВВЕРХ) */
+.player-right-volume {
+    display: flex;
+    justify-content: flex-end;
+}
+
+.volume-container {
+    position: relative; /* Для фиксации вылетающего меню */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--bg-card);
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    cursor: pointer;
+    transition: 0.3s ease;
+}
+
+.volume-slider {
+    position: absolute;
+    bottom: 55px; /* Позиция над иконкой */
+    left: 50%;
+    transform: translateX(-50%);
+    width: 34px;
+    height: 0; /* Изначально скрыт */
+    background: var(--bg-card);
+    border-radius: 20px;
+    display: flex;
+    justify-content: center;
+    align-items: flex-end; /* Чтобы полоска росла снизу вверх */
+    padding: 0;
+    overflow: hidden;
+    transition: height 0.3s ease, padding 0.3s ease;
+}
+
+.volume-container:hover .volume-slider {
+    height: 120px;
+    padding: 15px 0;
+}
+
+/* Настройка вертикальной полоски внутри слайдера */
+.volume-slider .bar-bg {
+    width: 4px;
+    height: 100%;
+    flex-grow: 0; /* Отключаем растягивание для верности */
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+}
+
+.volume-slider .bar-fill {
+    width: 100%;
+    /* Высота теперь берется из инлайнового стиля в HTML */
+}
+
+.vol-icon {
+    font-size: 16px;
+}
