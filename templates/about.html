@@ -20,6 +20,15 @@
     <main class="content-area">
         <div class="header-simple">
             <h1>О нашей команде</h1>
+            <div>
+                {% if session.username %}
+                    <span class="user-badge"> {{ session.username }}</span>
+                    <a href="{{ url_for('logout') }}" class="nav-btn-link">Выйти</a>
+                {% else %}
+                    <a href="{{ url_for('login') }}" class="nav-btn-link">Вход</a>
+                    <a href="{{ url_for('register') }}" class="nav-btn-link">Регистрация</a>
+                {% endif %}
+            </div>
         </div>
 
         <div class="cards-container">
@@ -47,7 +56,37 @@
 
         </div>
     </main>
+    <footer class="bottom-player">
+        <div class="player-controls-left">
+            <button class="nav-btn">⏮</button>
+            <button class="play-circle">▶</button>
+            <button class="nav-btn">⏭</button>
+        </div>
 
+        <div class="player-center-info">
+            <div class="track-now">
+                <img src="file:///C:/Users/user/Pictures/slungus.png" alt="Current" class="small-img">
+                <div class="text-info">
+                    <div class="t-title">1 muzika</div>
+                    <div class="t-sub">sozdatel1</div>
+                </div>
+            </div>
+            <div class="timeline-wrap">
+                <div class="time">0:00</div>
+                <div class="bar-bg"><div class="bar-fill"></div></div>
+                <div class="time">3:45</div>
+            </div>
+        </div>
+
+        <div class="player-right-volume">
+            <div class="volume-container">
+                <span class="vol-icon">🔊</span>
+                <div class="volume-slider">
+                    <div class="bar-bg"><div class="bar-fill" style="height: 20%;"></div></div>
+                </div>
+            </div>
+        </div>
+    </footer>
 </div>
 
 </body>
