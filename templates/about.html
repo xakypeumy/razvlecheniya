@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>О нас</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+
+<div class="app-layout">
+
+    <aside class="side-menu">
+        <div class="brand">razvlecheniya</div>
+        <nav class="nav-links">
+            <a href="{{ url_for('index') }}">Главная</a>
+            <a href="#" class="active">О нас</a>
+        </nav>
+    </aside>
+
+    <main class="content-area">
+        <div class="header-simple">
+            <h1>О нашей команде</h1>
+        </div>
+
+        <div class="cards-container">
+
+            <div class="music-card">
+                <h3>Потапов Р. В.</h3>
+                <p>Backend-разработчик (Flask, база данных)</p>
+                <p> </p>
+                <p><a href="https://github.com/xakypeumy" class="nav-btn-link">Профиль на GitHub</a></p>
+            </div>
+
+            <div class="music-card">
+                <h3>Хайбуллин А. Т.</h3>
+                <p>Frontend-разработчик (HTML, CSS, дизайн)</p>
+                <p> </p>
+                <p><a href="https://github.com/tyfvute" class="nav-btn-link">Профиль на GitHub</a></p>
+            </div>
+
+            <div class="music-card">
+                <h3>Маметова И. А.</h3>
+                <p>Тестирование и UX</p>
+                <p> </p>
+                <p><a href="https://github.com/" class="nav-btn-link">Профиль на GitHub</a></p>
+            </div>
+
+        </div>
+    </main>
+
+</div>
+
+</body>
+</html>

@@ -3,14 +3,12 @@ import os, sqlite3, uuid, hashlib, datetime
 
 # ==Конфиг==
 app = Flask(__name__)
-database = os.path.join(os.path.abspath(os.path.dirname(__file__)), "database.db")
-cursor = database.cursor()
 # =========
 
 def get_db():
     """Получение соединения с БД"""
     if "db" not in g:
-        g.db = sqlite3.connect(database)
+        g.db = sqlite3.connect('database.db')
         g.db.row_factory = sqlite3.Row
     return g.db
 
@@ -22,9 +20,9 @@ def close_db(exception):
         db.close()
 
 def init_db():
-    db = sqlite3.connect(database)
+    db = get_db()
     # Таблица пользователей
-    cursor.execute("""
+    db.execute("""
         CREATE TABLE IF NOT EXISTS users (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             username TEXT NOT NULL UNIQUE,
@@ -33,7 +31,7 @@ def init_db():
         )
     """)
     # Таблица загрузок
-    cursor.execute("""
+    db.execute("""
         CREATE TABLE IF NOT EXISTS uploads (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             name TEXT NOT NULL,
@@ -47,11 +45,12 @@ def init_db():
 
 def load_users():
     users_list = []
+    db=get_db()
     try:
-        cursor.execute('''
+        db.execute('''
         SELECT * FROM users
         ''')
-        existing_users = cursor.fetchall()
+        existing_users = db.fetchall()
         for user in existing_users:
             user_dict = {
                 'username': user[1],
@@ -59,7 +58,7 @@ def load_users():
                 'email': user[3],
             }
             users_list.append(user_dict)
-        database.commit()
+        db.commit()
 
     except FileNotFoundError:
         print("База данных не найдена.")
@@ -69,17 +68,26 @@ def load_users():
 
 def user_exists(username):
     try:
-        info = cursor.execute('SELECT username FROM users WHERE username = ?', (username,)).fetchone()
+        db = get_db()
+        info = db.execute('SELECT username FROM users WHERE username = ?', (username,)).fetchone()
+        info2 = db.execute('SELECT email FROM users WHERE email = ?', (username,)).fetchone()
         if info is None:
             return False
-        else:
+        if info is not None:
             return True
+
+        if info2 is None:
+            return False
+        if info2 is not None:
+            return True
+
     except FileNotFoundError:
         return False
 
 def save_user_to_file(username, password, email):
-    cursor.execute('INSERT INTO users (username, password, email) VALUES (?, ?, ?)', (username, password, email))
-    database.commit()
+    db = get_db()
+    db.execute('INSERT INTO users (username, password, email) VALUES (?, ?, ?)', (username, password, email))
+    db.commit()
 
 def login_required(f):
     def decorated_function(*args, **kwargs):
@@ -90,6 +98,47 @@ def login_required(f):
 
     decorated_function.__name__ = f.__name__
     return decorated_function
+
+def login():
+    if 'username' in session:
+        return redirect(url_for('index'))
+
+    if request.method == 'POST':
+        username = request.form['usernameORemail']
+        email = request.form['usernameORemail']
+        password = request.form['password']
+
+        users = load_users()
+        user_found = False
+        for user in users:
+            if user['username'] == username and user['password'] == password:
+                session['username'] = user['username']
+                print(session)
+                flash(f'Добро пожаловать, {username}!', 'success')
+                user_found = True
+                return redirect(url_for('index'))
+
+            elif user['email'] == username and user['password'] == password:
+                session['username'] = user['username']
+                print(session)
+                flash(f'Добро пожаловать, {username}!', 'success')
+                user_found = True
+                return redirect(url_for('index'))
+        if not user_found:
+            flash('Неверное имя пользователя или пароль', 'error')
+    return render_template('login.html')
+
+# ==Роуты==
+
+@app.route("/")
+def index():
+    db = get_db()
+    tracks = db.execute('SELECT * FROM uploads').fetchall()
+    return render_template('index.html', tracks=tracks)
+
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    return render_template('login.html')
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():
@@ -107,38 +156,29 @@ def register():
 
     return render_template('register.html')
 
-def login():
-    if 'username' in session:
-        return redirect(url_for('index'))
-
-    if request.method == 'POST':
-        username = request.form['username']
-        password = request.form['password']
-
-        users = load_users()
-        user_found = False
-        for user in users:
-            if user['username'] == username and user['password'] == password:
-                session['username'] = user['username']
-                print(session)
-                flash(f'Добро пожаловать, {username}!', 'success')
-                user_found = True
-                return redirect(url_for('index'))
-        if not user_found:
-            flash('Неверное имя пользователя или пароль', 'error')
-
-    return render_template('login.html')
-
 @app.route('/logout')
 def logout():
     session.clear()
     flash('Вы вышли из системы', 'info')
     return redirect(url_for('login'))
 
-# ==Роуты==
+@app.route('/about')
+def about():
+    return render_template('about.html')
 
-@app.route("/")
-def index():
-    return "В разработке"
+@app.route('/upload', methods=['GET', 'POST'])
+def upload():
+    if request.method == 'POST':
+        name = request.form['name']
+        author = request.form['author']
 
+        db = get_db()
+        db.execute('INSERT INTO uploads (name, author, uploadedby) VALUES (?, ?, ?)', (name, author, 1))
+        db.commit()
+
+        return redirect(url_for('index'))
+    return render_template('upload.html')
 # =========
+
+if __name__ == "__main__":
+    app.run(debug=True, host='0.0.0.0', port=5000)
