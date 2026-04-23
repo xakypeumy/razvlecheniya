@@ -265,12 +265,12 @@ body {
     color: var(--text-gray);
     padding: 10px 16px;
     border-radius: 20px;
-    background-color: var(--bg-card);
+    background-color: #121111;
     transition: 0.2s;
     margin-left: 10 px;
 }
 
 .nav-btn-link:hover {
     color: car(--text-white);
-    background-color: #2d3136;
+    background-color: #080808;
 }
