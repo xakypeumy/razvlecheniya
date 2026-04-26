@@ -4,9 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>razvlecheniya</title>
-        {% if session.username %}
-            <a href="{{ url_for('uploads') }}">Загрузить трек</a>
-        {% endif %}
     <link rel="stylesheet" href="static/style.css">
 </head>
 <body>
@@ -25,8 +22,16 @@
             <h1>Твои треки</h1>
             <div>
                 {% if session.username %}
-                    <span class="user-badge"> {{ session.username }}</span>
-                    <a href="{{ url_for('logout') }}" class="nav-btn-link">Выйти</a>
+                    <div class="profile-menu">
+                        <button class="profile-btn">{{ session.username }}</button>
+                        <div class="dropdown">
+                            {% if session.role == 'admin' %}
+                                <a href="{{ url_for('tickets') }}">Тикеты</a>
+                            {% endif %}
+                            <a href="{{ url_for('upload') }}">Загрузить трек</a>
+                            <a href="{{ url_for('logout') }}">Выйти</a>
+                        </div>
+                    </div>
                 {% else %}
                     <a href="{{ url_for('login') }}" class="nav-btn-link">Вход</a>
                     <a href="{{ url_for('register') }}" class="nav-btn-link">Регистрация</a>
@@ -36,10 +41,10 @@
 
         <div class="cards-container">
             {% for track in tracks %}
-                <div class="music-card">
-                    <img src="{{ url_for('static', filename='default.png') }}" class="image-box">
+                <div class="music-card" onclick="playTrack({{ loop.index0 }})">
+                    <img src="{% if track.cover_file %}{{ url_for('uploads', filename=track.cover_file) }}{% else %}{{ url_for('static', filename='default.png') }}{% endif %}" class="image-box">
                     <h3>{{ track.name }}</h3>
-                    <p>{{ tracks.author }}</p>
+                    <p>{{ track.author }}</p>
                 </div>
             {% endfor %}
         </div>
@@ -47,23 +52,23 @@
 
     <footer class="bottom-player">
         <div class="player-controls-left">
-            <button class="nav-btn">⏮</button>
-            <button class="play-circle">▶</button>
-            <button class="nav-btn">⏭</button>
+            <button class="nav-btn" onclick="previousTrack()">⏮</button>
+            <button class="play-circle" id="play-btn" onclick="togglePlayPause()">▶</button>
+            <button class="nav-btn" onclick="nextTrack()">⏭</button>
         </div>
 
         <div class="player-center-info">
             <div class="track-now">
-                <img src="file:///C:/Users/user/Pictures/slungus.png" alt="Current" class="small-img">
+                <img id="player-cover" src="{{ url_for('static', filename='default.png') }}" alt="Current" class="small-img">
                 <div class="text-info">
-                    <div class="t-title">1 muzika</div>
-                    <div class="t-sub">sozdatel1</div>
+                    <div id="player-title" class="t-title">Выберите трек</div>
+                    <div id="player-artist" class="t-sub">-</div>
                 </div>
             </div>
             <div class="timeline-wrap">
-                <div class="time">0:00</div>
-                <div class="bar-bg"><div class="bar-fill"></div></div>
-                <div class="time">3:45</div>
+                <div id="current-time" class="time">0:00</div>
+                <div class="bar-bg" id="timeline-bg"><div id="timeline-fill" class="bar-fill"></div></div>
+                <div id="duration" class="time">0:00</div>
             </div>
         </div>
 
@@ -71,12 +76,22 @@
             <div class="volume-container">
                 <span class="vol-icon">🔊</span>
                 <div class="volume-slider">
-                    <div class="bar-bg"><div class="bar-fill" style="height: 20%;"></div></div>
+                    <div class="bar-bg" id="volume-bg"><div id="volume-fill" class="bar-fill" style="height: 50%;"></div></div>
                 </div>
             </div>
         </div>
     </footer>
 </div>
+<audio id="main-player" preload="none"></audio>
+<script>
+const tracks = [
+{% for track in tracks %}
+    {audio: '{{ track.audio_file }}', cover: '{{ track.cover_file }}', title: '{{ track.name }}', artist: '{{ track.author }}'},
+{% endfor %}
+];
+let currentIndex = -1;
+</script>
 
+<script src="{{ url_for('static', filename='script.js') }}"></script>
 </body>
 </html>

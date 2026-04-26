@@ -1,31 +1,49 @@
 <!DOCTYPE html>
-<html>
+<html lang="ru">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Регистрация</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
-    <div class="form-container">
-        <h2>Регистрация</h2>
 
-        {% with messages = get_flashed_messages(with_categories=true) %}
-            {% if messages %}
-                {% for category, message in messages %}
-                    <div class="flash {{ category }}">{{ message }}</div>
-                {% endfor %}
-            {% endif %}
-        {% endwith %}
+<div class="app-layout">
+    <aside class="side-menu">
+        <div class="brand">ISPmusic</div>
+        <nav class="nav-links">
+            <a href="{{ url_for('index') }}">Главная</a>
+            <a href="{{ url_for('about') }}">О Нас</a>
+        </nav>
+    </aside>
 
-        <form method="POST">
-            <input type="text" name="username" placeholder="Имя пользователя" required>
-            <input type="password" name="password" placeholder="Пароль" required>
-            <input type="email" name="email" placeholder="Адрес Эл. Почты" required>
-            <button type="submit" class="btn register-btn">Зарегистрироваться</button>
-        </form>
+    <main class="content-area">
+        <div class="header-simple">
+            <h1>Регистрация</h1>
+            <div>
+                <a href="{{ url_for('login') }}" class="nav-btn-link">Вход</a>
+            </div>
+        </div>
 
-        <form action="{{ url_for('login') }}" method="GET">
-            <button type="submit" class="btn login-btn">Войти</button>
-        </form>
-    </div>
+        <div class="form-container">
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    {% for category, message in messages %}
+                        <div class="flash {{ category }}">{{ message }}</div>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+
+            <form method="POST">
+                <input type="text" name="username" placeholder="Имя пользователя" required>
+                <input type="password" name="password" placeholder="Пароль" required>
+                <input type="email" name="email" placeholder="Адрес Эл. Почты" required>
+                <button type="submit" class="btn register-btn">Зарегистрироваться</button>
+            </form>
+        </div>
+    </main>
+</div>
+
+<script src="{{ url_for('static', filename='script.js') }}"></script>
 </body>
 </html>

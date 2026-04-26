@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Загрузить трек</title>
+    <title>Тикеты</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
@@ -19,7 +19,7 @@
 
     <main class="content-area">
         <div class="header-simple">
-            <h1>Загрузить трек</h1>
+            <h1>Тикеты на проверку</h1>
             <div>
                 {% if session.username %}
                     <div class="profile-menu">
@@ -39,35 +39,28 @@
             </div>
         </div>
 
-        <div class="form-container">
-            {% with messages = get_flashed_messages(with_categories=true) %}
-                {% if messages %}
-                    {% for category, message in messages %}
-                        <div class="flash {{ category }}">{{ message }}</div>
-                    {% endfor %}
-                {% endif %}
-            {% endwith %}
-
-            <form method="POST" enctype="multipart/form-data">
-                <input type="text" name="title" placeholder="Название трека" required>
-                <input type="text" name="artist" placeholder="Исполнитель" required>
-                <label>Аудио файл:</label>
-                <input type="file" name="audio" accept="audio/*" required>
-                <label>Обложка:</label>
-                <input type="file" name="cover" accept="image/*" required>
-                <button type="submit" class="btn upload-btn">Отправить на проверку</button>
-            </form>
+        <div class="cards-container">
+            {% for ticket in tickets %}
+                <div class="music-card">
+                    <img src="{{ url_for('uploads', filename=ticket.cover_file) }}" class="image-box">
+                    <h3>{{ ticket.title }}</h3>
+                    <p>{{ ticket.artist }}</p>
+                    <audio controls>
+                        <source src="{{ url_for('uploads', filename=ticket.audio_file) }}" type="audio/mpeg">
+                    </audio>
+                    <div class="card-actions">
+                        <form method="POST" action="{{ url_for('approve_ticket', ticket_id=ticket.id) }}" style="display:inline;">
+                            <button type="submit" class="btn">Опубликовать</button>
+                        </form>
+                        <form method="POST" action="{{ url_for('reject_ticket', ticket_id=ticket.id) }}" style="display:inline;">
+                            <button type="submit" class="btn">Удалить</button>
+                        </form>
+                    </div>
+                </div>
+            {% endfor %}
         </div>
     </main>
 </div>
-<script>
-const tracks = [
-{% for track in tracks %}
-    {audio: '{{ track.audio_file }}', cover: '{{ track.cover_file }}', title: '{{ track.name }}', artist: '{{ track.author }}'},
-{% endfor %}
-];
-let currentIndex = -1;
-</script>
 
 <script src="{{ url_for('static', filename='script.js') }}"></script>
 </body>

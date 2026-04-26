@@ -100,6 +100,97 @@ body {
     transform: translateY(-5px);
 }
 
+.music-card audio {
+    width: 100%;
+    margin: 10px 0;
+}
+
+.music-card .btn {
+    padding: 8px 16px;
+    background-color: var(--accent);
+    color: white;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: 0.2s;
+    margin-right: 10px;
+}
+
+.music-card .btn:hover {
+    background-color: #5a8fd7;
+}
+
+.card-actions {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 10px;
+}
+
+/* Формы */
+.form-container {
+    max-width: 400px;
+    margin: 50px auto;
+    padding: 20px;
+    background-color: var(--bg-card);
+    border-radius: var(--radius);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.form-container h2 {
+    text-align: center;
+    margin-bottom: 20px;
+    color: var(--text-white);
+}
+
+.form-container input {
+    width: 100%;
+    padding: 12px;
+    margin-bottom: 15px;
+    border: 1px solid #444;
+    border-radius: 10px;
+    background-color: var(--bg-side);
+    color: var(--text-white);
+    font-size: 14px;
+}
+
+.form-container input::placeholder {
+    color: var(--text-gray);
+}
+
+.form-container button {
+    width: 100%;
+    padding: 12px;
+    background-color: var(--accent);
+    color: white;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: 0.2s;
+}
+
+.form-container button:hover {
+    background-color: #5a8fd7;
+}
+
+.flash {
+    padding: 10px;
+    margin-bottom: 15px;
+    border-radius: 5px;
+    text-align: center;
+}
+
+.flash.success {
+    background-color: #4CAF50;
+    color: white;
+}
+
+.flash.error {
+    background-color: #f44336;
+    color: white;
+}
+
 .image-box {
     width: 100%;
     aspect-ratio: 1;
@@ -273,4 +364,49 @@ body {
 .nav-btn-link:hover {
     color: car(--text-white);
     background-color: #080808;
+}
+/* Профиль меню */
+.profile-menu {
+    position: relative;
+    display: inline-block;
+}
+
+.profile-btn {
+    background-color: var(--bg-card);
+    color: var(--text-white);
+    border: none;
+    padding: 10px 16px;
+    border-radius: 20px;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+.profile-btn:hover {
+    background-color: #3a3d42;
+}
+
+.dropdown {
+    display: none;
+    position: absolute;
+    right: 0;
+    background-color: var(--bg-card);
+    min-width: 120px;
+    box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+    z-index: 1;
+    border-radius: 10px;
+}
+
+.dropdown a {
+    color: var(--text-white);
+    padding: 12px 16px;
+    text-decoration: none;
+    display: block;
+}
+
+.dropdown a:hover {
+    background-color: #3a3d42;
+}
+
+.dropdown.show {
+    display: block;
 }
