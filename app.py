@@ -8,6 +8,7 @@ app.secret_key = '123'
 app.config['UPLOAD_FOLDER'] = 'uploads'
 # =========
 
+# ==Функции==
 @app.route('/uploads/<filename>')
 def uploads(filename):
     return send_from_directory(app.config['UPLOAD_FOLDER'], filename)
@@ -107,9 +108,9 @@ def user_exists(username):
         if info is not None:
             return True
 
-        if info2 is None:
+        elif info2 is None:
             return False
-        if info2 is not None:
+        elif info2 is not None:
             return True
 
     except FileNotFoundError:
@@ -129,6 +130,8 @@ def login_required(f):
 
     decorated_function.__name__ = f.__name__
     return decorated_function
+
+# ==Руты==
 
 @app.route("/")
 def index():
