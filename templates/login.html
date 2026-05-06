@@ -5,12 +5,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Вход</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='logo.ico') }}">
 </head>
 <body>
 
 <div class="app-layout">
     <aside class="side-menu">
-        <div class="brand"><a href="{{ url_for('index') }}"><img class="logo" src="uploads/logo.png"></a></div>
+        <div class="brand"><a href="{{ url_for('index') }}"><img class="logo" src="static/logo.png"></a></div>
         <nav class="nav-links">
             <a href="{{ url_for('index') }}">Главная</a>
             <a href="{{ url_for('about') }}">О Нас</a>
