@@ -27,12 +27,23 @@ body {
     grid-template-columns: 220px 1fr;
     grid-template-rows: 1fr 110px;
     height: 100vh;
+    transition: grid-template-columns 0.3s ease;
+}
+
+.app-layout.collapsed {
+    grid-template-columns: 60px 1fr;
 }
 
 /* Боковое меню */
 .side-menu {
     background-color: var(--bg-side);
     padding: 30px 20px;
+    transition: width 0.3s ease, padding 0.3s ease;
+    overflow: hidden;
+}
+
+.side-menu.collapsed {
+    padding: 30px 10px;
 }
 
 .brand {
@@ -40,12 +51,52 @@ body {
     font-size: 20px;
     color: var(--accent);
     margin-bottom: 40px;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.logo {
+    height: 40px;
+    transition: opacity 0.3s ease;
+}
+
+.logo-mini {
+    height: 30px;
+    transition: opacity 0.3s ease;
+}
+
+.menu-toggle {
+    background: none;
+    border: none;
+    color: var(--text-gray);
+    font-size: 16px;
+    cursor: pointer;
+    padding: 5px;
+    border-radius: 4px;
+    transition: 0.2s;
+}
+
+.menu-toggle:hover {
+    background-color: rgba(122, 162, 247, 0.1);
+    color: var(--accent);
+}
+
+.side-menu.collapsed .menu-toggle {
+    transform: rotate(180deg);
 }
 
 .nav-links {
     display: flex;
     flex-direction: column;
     gap: 10px;
+    transition: opacity 0.3s ease;
+}
+
+.side-menu.collapsed .nav-links {
+    opacity: 0;
+    pointer-events: none;
 }
 
 .nav-links a {
@@ -71,6 +122,36 @@ body {
     display: flex;
     justify-content: space-between;
     margin-bottom: 30px;
+}
+
+.header-controls {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.player-toggle {
+    background: none;
+    border: 1px solid var(--text-gray);
+    color: var(--text-gray);
+    font-size: 14px;
+    cursor: pointer;
+    padding: 5px 10px;
+    border-radius: 4px;
+    transition: 0.2s;
+}
+
+.player-toggle:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+}
+
+.app-layout.player-hidden {
+    grid-template-rows: 1fr 0px;
+}
+
+.app-layout.player-hidden .bottom-player {
+    display: none;
 }
 
 .user-badge {
@@ -414,4 +495,318 @@ body {
 .logo {
     width: 180px;
     height: 35px;
+}
+
+/* Track Modal */
+.track-modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1000;
+}
+
+.track-modal.active {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.modal-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.7);
+    cursor: pointer;
+}
+
+.modal-content {
+    position: relative;
+    background-color: var(--bg-card);
+    border-radius: var(--radius);
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+    max-width: 600px;
+    width: 90%;
+    max-height: 80vh;
+    overflow-y: auto;
+    z-index: 1001;
+    animation: slideIn 0.3s ease-out;
+}
+
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateY(-30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.modal-close {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    background: none;
+    border: none;
+    color: var(--text-gray);
+    font-size: 32px;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.modal-close:hover {
+    color: var(--text-white);
+}
+
+.modal-header {
+    display: flex;
+    gap: 30px;
+    padding: 40px;
+    background: linear-gradient(135deg, rgba(122, 162, 247, 0.1) 0%, rgba(122, 162, 247, 0.05) 100%);
+    border-radius: var(--radius) var(--radius) 0 0;
+}
+
+.modal-cover {
+    width: 150px;
+    height: 150px;
+    border-radius: 15px;
+    object-fit: cover;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+}
+
+.modal-header-info {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.modal-header-info h2 {
+    margin: 0 0 10px 0;
+    font-size: 28px;
+    color: var(--text-white);
+}
+
+.modal-artist {
+    color: var(--text-gray);
+    font-size: 16px;
+    margin-bottom: 15px;
+}
+
+.modal-badges {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.badge {
+    background-color: rgba(122, 162, 247, 0.2);
+    color: var(--accent);
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 500;
+}
+
+.modal-body {
+    padding: 30px;
+}
+
+.info-section {
+    margin-bottom: 30px;
+}
+
+.info-section h3 {
+    font-size: 18px;
+    margin-bottom: 15px;
+    color: var(--text-white);
+    border-bottom: 2px solid rgba(122, 162, 247, 0.2);
+    padding-bottom: 10px;
+}
+
+.track-details {
+    background-color: rgba(25, 28, 36, 0.5);
+    padding: 15px;
+    border-radius: 12px;
+    border-left: 3px solid var(--accent);
+}
+
+.track-details p {
+    margin: 8px 0;
+    color: var(--text-gray);
+    line-height: 1.6;
+}
+
+.track-details strong {
+    color: var(--text-white);
+}
+
+.track-details span {
+    color: var(--accent);
+}
+
+.modal-footer {
+    padding: 30px;
+    border-top: 1px solid rgba(122, 162, 247, 0.1);
+    display: flex;
+    gap: 15px;
+    justify-content: center;
+}
+
+.modal-btn {
+    background-color: var(--accent);
+    color: white;
+    border: none;
+    padding: 12px 40px;
+    border-radius: 25px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+.modal-btn:hover {
+    background-color: #6a96e8;
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(122, 162, 247, 0.3);
+}
+
+/* Scrollbar для модального окна */
+.modal-content::-webkit-scrollbar {
+    width: 8px;
+}
+
+.modal-content::-webkit-scrollbar-track {
+    background: rgba(122, 162, 247, 0.1);
+    border-radius: 10px;
+}
+
+.modal-content::-webkit-scrollbar-thumb {
+    background: var(--accent);
+    border-radius: 10px;
+}
+
+.modal-content::-webkit-scrollbar-thumb:hover {
+    background: #6a96e8;
+}
+
+/* Similar Tracks */
+.similar-tracks-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.similar-track-item {
+    background-color: rgba(25, 28, 36, 0.5);
+    padding: 12px 15px;
+    border-radius: 10px;
+    border-left: 3px solid rgba(122, 162, 247, 0.5);
+    transition: 0.2s;
+    cursor: pointer;
+}
+
+.similar-track-item:hover {
+    background-color: rgba(25, 28, 36, 0.8);
+    border-left-color: var(--accent);
+}
+
+.similar-track-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 5px;
+}
+
+.similar-track-name {
+    color: var(--text-white);
+    font-weight: 500;
+    flex: 1;
+}
+
+.similar-track-match {
+    background-color: rgba(122, 162, 247, 0.2);
+    color: var(--accent);
+    padding: 2px 8px;
+    border-radius: 10px;
+    font-size: 12px;
+    margin-left: 10px;
+    white-space: nowrap;
+}
+
+.similar-track-artist {
+    color: var(--text-gray);
+    font-size: 13px;
+    margin: 5px 0 0 0;
+}
+
+/* Info Links */
+.info-link {
+    color: var(--accent);
+    text-decoration: none;
+    display: inline-block;
+    margin-top: 10px;
+    padding: 6px 12px;
+    background-color: rgba(122, 162, 247, 0.1);
+    border-radius: 8px;
+    transition: 0.2s;
+}
+
+.info-link:hover {
+    background-color: rgba(122, 162, 247, 0.2);
+    transform: translateX(2px);
+}
+
+/* Tags */
+.tags-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.tag {
+    background-color: rgba(122, 162, 247, 0.15);
+    color: var(--accent);
+    padding: 4px 10px;
+    border-radius: 15px;
+    font-size: 12px;
+    border: 1px solid rgba(122, 162, 247, 0.3);
+}
+
+/* Lyrics text styling */
+.lyrics-text {
+    background-color: var(--bg-side);
+    padding: 20px;
+    border-radius: 10px;
+    margin: 15px 0;
+    font-family: 'Courier New', monospace;
+    font-size: 14px;
+    line-height: 1.6;
+    white-space: pre-wrap;
+    max-height: 300px;
+    overflow-y: auto;
+    border: 1px solid rgba(122, 162, 247, 0.2);
+}
+
+.lyrics-text::-webkit-scrollbar {
+    width: 6px;
+}
+
+.lyrics-text::-webkit-scrollbar-track {
+    background: var(--bg-side);
+}
+
+.lyrics-text::-webkit-scrollbar-thumb {
+    background: var(--accent);
+    border-radius: 3px;
+}
+
+.lyrics-text::-webkit-scrollbar-thumb:hover {
+    background: #8bb3f8;
 }

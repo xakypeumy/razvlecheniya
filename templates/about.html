@@ -10,9 +10,15 @@
 
 <div class="app-layout">
 
-    <aside class="side-menu">
-        <div class="brand"><a href="{{ url_for('index') }}"><img class="logo" src="static/logo.png"></a></div>
-        <nav class="nav-links">
+    <aside class="side-menu" id="side-menu">
+        <div class="brand">
+            <a href="{{ url_for('index') }}">
+                <img class="logo" id="main-logo" src="static/logo.png">
+                <img class="logo-mini" id="mini-logo" src="static/logo_mini.png" style="display: none;">
+            </a>
+            <button class="menu-toggle" id="menu-toggle" onclick="toggleSidebar()">◀</button>
+        </div>
+        <nav class="nav-links" id="nav-links">
             <a href="{{ url_for('index') }}">Главная</a>
             <a href="#" class="active">О Нас</a>
         </nav>
@@ -21,7 +27,8 @@
     <main class="content-area">
         <div class="header-simple">
             <h1>О нашей команде</h1>
-            <div>
+            <div class="header-controls">
+                <button class="player-toggle" id="player-toggle" onclick="togglePlayer()">▼</button>
                 {% if session.username %}
                     <div class="profile-menu">
                         <button class="profile-btn">{{ session.username }}</button>
