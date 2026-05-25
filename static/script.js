@@ -29,12 +29,14 @@ function togglePlayer() {
 
     appLayout.classList.toggle('player-minimized');
 
-    if (appLayout.classList.contains('player-minimized')) {
-        playerToggle.textContent = '▲';
-        playerToggle.title = 'Развернуть плеер';
-    } else {
-        playerToggle.textContent = '▼';
-        playerToggle.title = 'Свернуть плеер';
+    if (playerToggle) {
+        if (appLayout.classList.contains('player-minimized')) {
+            playerToggle.textContent = '▲';
+            playerToggle.title = 'Развернуть плеер';
+        } else {
+            playerToggle.textContent = '▼';
+            playerToggle.title = 'Свернуть плеер';
+        }
     }
 
     // Save player state
@@ -63,30 +65,37 @@ function initUploadMetadata() {
         uploadHint.textContent = 'Сканируем метаданные...';
         titleInput.value = '';
         artistInput.value = '';
-        previewCover.src = '/static/default.png';
+        previewCover.src = previewCover.dataset.defaultSrc || '/static/logo.png';
 
         const setFallbackFromFilename = () => {
             const filename = file.name.replace(/\.[^/.]+$/, '').trim();
             const pipeParts = filename.split(/\s*\|\s*/).map(part => part.trim()).filter(Boolean);
 
-            if (pipeParts.length >= 4 && /^\d+$/.test(pipeParts[1])) {
+            if (pipeParts.length >= 5) {
                 titleInput.value = titleInput.value || pipeParts[2];
                 artistInput.value = artistInput.value || pipeParts[3];
                 return;
             }
 
-            if (pipeParts.length >= 3) {
-                // если есть по крайней мере 3 части, считаем, что последняя до альбома - исполнитель
-                titleInput.value = titleInput.value || pipeParts[pipeParts.length - 2];
-                artistInput.value = artistInput.value || pipeParts[pipeParts.length - 1];
+            if (pipeParts.length === 4 && /^\d+$/.test(pipeParts[1])) {
+                titleInput.value = titleInput.value || pipeParts[2];
+                artistInput.value = artistInput.value || pipeParts[3];
+                return;
+            }
+
+            if (pipeParts.length === 3) {
+                titleInput.value = titleInput.value || pipeParts[1];
+                artistInput.value = artistInput.value || pipeParts[2];
                 return;
             }
 
             const patterns = [
-                /^(?<artist>.+?)\s*-\s*(?<title>.+)$/,
+                /^(?<artist>.+?)\s*[-–—]\s*(?<title>.+)$/,
+                /^(?<title>.+?)\s*[-–—]\s*(?<artist>.+)$/,
                 /^(?<artist>.+?)\s*\((?<title>.+?)\)$/,
-                /^(?<artist>.+?)\s+–\s+(?<title>.+)$/,
-                /^(?<title>.+?)\s+–\s+(?<artist>.+)$/
+                /^(?<title>.+?)\s*\((?<artist>.+?)\)$/,
+                /^(?<artist>.+?)\s*\[(?<title>.+?)\]$/,
+                /^(?<title>.+?)\s*\[(?<artist>.+?)\]$/
             ];
 
             for (const pattern of patterns) {
@@ -98,10 +107,17 @@ function initUploadMetadata() {
                 }
             }
 
-            const fallbackParts = filename.split(/\s*-\s*/);
+            const fallbackParts = filename.split(/\s*[-–—]\s*/).map(part => part.trim()).filter(Boolean);
             if (fallbackParts.length >= 2) {
-                artistInput.value = artistInput.value || fallbackParts[0].trim();
-                titleInput.value = titleInput.value || fallbackParts.slice(1).join(' - ').trim();
+                const first = fallbackParts[0];
+                const rest = fallbackParts.slice(1).join(' - ');
+                if (/^\d+/u.test(first) && rest) {
+                    titleInput.value = titleInput.value || first;
+                    artistInput.value = artistInput.value || rest;
+                } else {
+                    artistInput.value = artistInput.value || first;
+                    titleInput.value = titleInput.value || rest;
+                }
             } else {
                 titleInput.value = titleInput.value || filename;
             }
@@ -124,36 +140,92 @@ function initUploadMetadata() {
             return '';
         };
 
-        if (window.jsmediatags) {
-            jsmediatags.read(file, {
-                onSuccess: function(tag) {
-                    const tags = tag.tags || {};
-                    titleInput.value = readTagValue(tags, ['title', 'TIT2', 'TITLE']) || titleInput.value || '';
-                    artistInput.value = readTagValue(tags, ['artist', 'TPE1', 'ARTIST']) || artistInput.value || '';
+        const setCoverFromPicture = (picture) => {
+            if (!picture || !picture.data) {
+                return;
+            }
 
-                    if (tags.picture) {
-                        const picture = tags.picture;
-                        let base64String = '';
-                        for (let i = 0; i < picture.data.length; i++) {
-                            base64String += String.fromCharCode(picture.data[i]);
+            const format = picture.format || 'image/jpeg';
+            const bytes = picture.data instanceof Uint8Array ? picture.data : new Uint8Array(picture.data);
+            let binary = '';
+            for (let i = 0; i < bytes.length; i++) {
+                binary += String.fromCharCode(bytes[i]);
+            }
+            previewCover.src = `data:${format};base64,${btoa(binary)}`;
+        };
+
+        const getTagText = (value) => {
+            if (!value && value !== 0) return '';
+            if (typeof value === 'string') return value.trim();
+            if (typeof value === 'number') return String(value);
+            if (Array.isArray(value)) return value.map(getTagText).filter(Boolean).join(', ');
+            if (value.data) return String(value.data).trim();
+            if (value.text) return String(value.text).trim();
+            if (value.value) return getTagText(value.value);
+            return '';
+        };
+
+        const normalizeTagKey = (key) => String(key).toLowerCase().replace(/[^a-z0-9]/g, '');
+
+        const extractTagValue = (tags, candidates) => {
+            const normalizedCandidates = candidates.map(normalizeTagKey);
+            for (const [key, value] of Object.entries(tags || {})) {
+                const normalizedKey = normalizeTagKey(key);
+                if (normalizedCandidates.includes(normalizedKey)) {
+                    const text = getTagText(value);
+                    if (text) return text;
+                }
+            }
+            return '';
+        };
+
+        const applyJsMediaTags = (tag) => {
+            const tags = tag.tags || {};
+            const title = extractTagValue(tags, ['title', 'tit2', '©nam', 'nam', 'title']);
+            const artist = extractTagValue(tags, ['artist', 'tpe1', '©art', 'aart', 'artists', 'albumartist']);
+
+            if (title) titleInput.value = title;
+            if (artist) artistInput.value = artist;
+
+            if (tags.picture) {
+                setCoverFromPicture(tags.picture);
+            } else if (tags.cover && tags.cover.length) {
+                setCoverFromPicture(tags.cover[0]);
+            }
+        };
+
+        const parseWithJsMediaTags = () => {
+            return new Promise((resolve) => {
+                if (!window.jsmediatags) {
+                    return resolve(false);
+                }
+                try {
+                    jsmediatags.read(file, {
+                        onSuccess: function(tag) {
+                            applyJsMediaTags(tag);
+                            resolve(true);
+                        },
+                        onError: function(error) {
+                            console.error('jsmediatags error:', error);
+                            resolve(false);
                         }
-                        const imageBase64 = btoa(base64String);
-                        previewCover.src = `data:${picture.format};base64,${imageBase64}`;
-                    }
-
-                    setFallbackFromFilename();
-                    uploadHint.textContent = 'Проверка завершена. Отредактируйте данные при необходимости.';
-                },
-                onError: function(error) {
-                    console.error('jsmediatags error:', error);
-                    setFallbackFromFilename();
-                    uploadHint.textContent = 'Не удалось прочитать метаданные. Использованы данные из имени файла.';
+                    });
+                } catch (error) {
+                    console.error('jsmediatags exception:', error);
+                    resolve(false);
                 }
             });
-        } else {
+        };
+
+        (async () => {
+            const metadataHandled = await parseWithJsMediaTags();
             setFallbackFromFilename();
-            uploadHint.textContent = 'Метаданные недоступны. Заполните поля вручную.';
-        }
+            if (metadataHandled) {
+                uploadHint.textContent = 'Метаданные успешно считаны. Отредактируйте при необходимости.';
+            } else {
+                uploadHint.textContent = 'Не удалось прочитать метаданные. Использованы данные из имени файла.';
+            }
+        })();
     });
 }
 
@@ -173,9 +245,11 @@ document.addEventListener('DOMContentLoaded', function() {
 
     initUploadMetadata();
 
-    // Restore player state
+    const mainPlayer = document.getElementById('main-player');
+
+    // Restore player state only when the player exists
     const savedIndex = localStorage.getItem('currentIndex');
-    if (savedIndex !== null && tracks.length > 0) {
+    if (mainPlayer && savedIndex !== null && tracks.length > 0) {
         currentIndex = parseInt(savedIndex);
         playTrack(currentIndex);
     }
@@ -283,16 +357,29 @@ document.addEventListener('DOMContentLoaded', function() {
 function playTrack(index) {
     const track = tracks[index];
     const player = document.getElementById('main-player');
+    if (!player || !track) {
+        return;
+    }
     const coverImg = document.getElementById('player-cover');
     const titleDiv = document.getElementById('player-title');
     const artistDiv = document.getElementById('player-artist');
     const playBtn = document.getElementById('play-btn');
 
-    player.src = '/uploads/' + track.audio;
+    const audioSrc = track.audio_file || track.audio;
+    if (!audioSrc) {
+        return;
+    }
+    player.src = '/uploads/' + audioSrc;
     player.load(); // Ensure load
-    coverImg.src = track.cover ? '/uploads/' + track.cover : '/static/default.png';
-    titleDiv.textContent = track.title;
-    artistDiv.textContent = track.artist;
+    if (coverImg) {
+        coverImg.src = track.cover_file ? '/uploads/' + track.cover_file : '/static/logo.png';
+    }
+    if (titleDiv) {
+        titleDiv.textContent = track.name || track.title || 'Название';
+    }
+    if (artistDiv) {
+        artistDiv.textContent = track.author || track.artist || 'Исполнитель';
+    }
     currentIndex = index;
 
     player.volume = parseFloat(localStorage.getItem('volume')) || 0.5;
@@ -393,11 +480,16 @@ function formatTime(seconds) {
 function openTrackModal(index) {
     const track = tracks[index];
     const modal = document.getElementById('track-modal');
-    
+    if (!track || !modal) {
+        return;
+    }
+    const title = track.name || track.title || 'Название';
+    const artist = track.author || track.artist || 'Исполнитель';
+
     // Установка базовой информации
-    document.getElementById('modal-title').textContent = track.title;
-    document.getElementById('modal-artist').textContent = track.artist;
-    document.getElementById('modal-cover').src = track.cover ? '/uploads/' + track.cover : '/static/default.png';
+    document.getElementById('modal-title').textContent = title;
+    document.getElementById('modal-artist').textContent = artist;
+    document.getElementById('modal-cover').src = track.cover_file ? '/uploads/' + track.cover_file : '/static/logo.png';
     
     // Очистка информации
     document.getElementById('modal-info').innerHTML = '<p>Загрузка информации...</p>';
@@ -408,7 +500,7 @@ function openTrackModal(index) {
     modal.classList.add('active');
     
     // Запрашиваем информацию о треке
-    fetchTrackInfo(track.artist, track.title, index);
+    fetchTrackInfo(artist, title, index);
 }
 
 // Закрытие модального окна
@@ -427,7 +519,9 @@ function playFromModal() {
         
         // Find the track index
         for (let i = 0; i < tracks.length; i++) {
-            if (tracks[i].title === title && tracks[i].artist === artist) {
+            const trackTitle = tracks[i].name || tracks[i].title;
+            const trackArtist = tracks[i].author || tracks[i].artist;
+            if (trackTitle === title && trackArtist === artist) {
                 playTrack(i);
                 break;
             }

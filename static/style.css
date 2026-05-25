@@ -707,7 +707,7 @@ body {
     background-color: var(--bg-card);
     border-radius: var(--radius);
     box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
-    max-width: 600px;
+    max-width: 900px;
     width: 90%;
     max-height: 80vh;
     overflow-y: auto;
@@ -763,6 +763,7 @@ body {
     display: flex;
     flex-direction: column;
     justify-content: center;
+    gap: 16px;
 }
 
 .modal-header-info h2 {
@@ -794,6 +795,18 @@ body {
 
 .modal-body {
     padding: 30px;
+}
+
+.modal-body-grid {
+    display: grid;
+    grid-template-columns: 1.2fr 0.8fr;
+    gap: 24px;
+}
+
+.modal-column {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
 }
 
 .info-section {
@@ -853,6 +866,22 @@ body {
     background-color: #6a96e8;
     transform: translateY(-2px);
     box-shadow: 0 5px 15px rgba(122, 162, 247, 0.3);
+}
+
+.modal-btn-header {
+    width: fit-content;
+    padding: 10px 28px;
+    font-size: 15px;
+    align-self: flex-start;
+}
+
+@media (max-width: 960px) {
+    .modal-content {
+        max-width: 95%;
+    }
+    .modal-body-grid {
+        grid-template-columns: 1fr;
+    }
 }
 
 /* Scrollbar для модального окна */

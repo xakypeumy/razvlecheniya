@@ -15,6 +15,7 @@
         <nav class="nav-links">
             <a href="{{ url_for('index') }}">Главная</a>
             <a href="{{ url_for('about') }}">О Нас</a>
+            <a href="{{ url_for('upload') }}" class="active">Загрузить трек</a>
         </nav>
     </aside>
 
@@ -29,7 +30,6 @@
                             {% if session.role == 'admin' %}
                                 <a href="{{ url_for('tickets') }}">Тикеты</a>
                             {% endif %}
-                            <a href="{{ url_for('upload') }}">Загрузить трек</a>
                             <a href="{{ url_for('logout') }}">Выйти</a>
                         </div>
                     </div>
@@ -58,7 +58,7 @@
 
                 <div class="upload-preview hidden" id="preview-card">
                     <div class="preview-image-wrapper">
-                        <img id="preview-cover" src="{{ url_for('static', filename='default.png') }}" alt="Cover preview" class="preview-image">
+                        <img id="preview-cover" src="{{ url_for('static', filename='logo.png') }}" alt="Cover preview" class="preview-image" data-default-src="{{ url_for('static', filename='logo.png') }}">
                     </div>
                     <div class="preview-details">
                         <input id="title-input" type="text" name="title" placeholder="Название трека" required>
@@ -73,15 +73,23 @@
     </main>
 </div>
 <script>
-const tracks = [
-{% for track in tracks %}
-    {audio: '{{ track.audio_file }}', cover: '{{ track.cover_file }}', title: '{{ track.name }}', artist: '{{ track.author }}'},
-{% endfor %}
-];
+const tracks = {{ tracks_json | safe }};
 let currentIndex = -1;
 </script>
 
-<script src="https://cdn.jsdelivr.net/npm/jsmediatags@3.9.5/dist/jsmediatags.min.js"></script>
+<script src="{{ url_for('static', filename='jsmediatags.min.js') }}"></script>
 <script src="{{ url_for('static', filename='script.js') }}"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const audioInput = document.getElementById('audio-input');
+    const previewCard = document.getElementById('preview-card');
+    const uploadHint = document.getElementById('upload-hint');
+    if (!audioInput) return;
+    audioInput.addEventListener('change', function() {
+        if (previewCard) previewCard.classList.remove('hidden');
+        if (uploadHint) uploadHint.textContent = 'Файл выбран. Обработка метаданных...';
+    });
+});
+</script>
 </body>
 </html>

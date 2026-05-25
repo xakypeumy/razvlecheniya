@@ -21,6 +21,9 @@
         <nav class="nav-links" id="nav-links">
             <a href="{{ url_for('index') }}">Главная</a>
             <a href="#" class="active">О Нас</a>
+            {% if session.username %}
+                <a href="{{ url_for('upload') }}">Загрузить трек</a>
+            {% endif %}
         </nav>
     </aside>
 
@@ -35,7 +38,6 @@
                             {% if session.role == 'admin' %}
                                 <a href="{{ url_for('tickets') }}">Тикеты</a>
                             {% endif %}
-                            <a href="{{ url_for('upload') }}">Загрузить трек</a>
                             <a href="{{ url_for('logout') }}">Выйти</a>
                         </div>
                     </div>
@@ -105,11 +107,7 @@
     </footer>
 </div>
 <script>
-const tracks = [
-{% for track in tracks %}
-    {audio: '{{ track.audio_file }}', cover: '{{ track.cover_file }}', title: '{{ track.name }}', artist: '{{ track.author }}'},
-{% endfor %}
-];
+const tracks = {{ tracks | tojson | safe }};
 let currentIndex = -1;
 </script>
 

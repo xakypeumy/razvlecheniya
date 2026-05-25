@@ -97,6 +97,10 @@ def init_db():
     db.commit()
     db.close()
 
+def rows_to_dicts(rows):
+    return [dict(row) for row in rows]
+
+
 def load_users():
     users_list = []
     db=get_db()
@@ -478,7 +482,7 @@ def get_track_info(artist, title):
 @app.route("/")
 def index():
     db = get_db()
-    tracks = db.execute('SELECT * FROM uploads').fetchall()
+    tracks = rows_to_dicts(db.execute('SELECT * FROM uploads').fetchall())
     return render_template('index.html', tracks=tracks)
 
 @app.route('/api/track-info')
@@ -638,7 +642,7 @@ def edit_ticket(ticket_id):
 @app.route('/about')
 def about():
     db = get_db()
-    tracks = db.execute('SELECT * FROM uploads').fetchall()
+    tracks = rows_to_dicts(db.execute('SELECT * FROM uploads').fetchall())
     return render_template('about.html', tracks=tracks)
 
 @app.route('/upload', methods=['GET', 'POST'])
@@ -670,8 +674,9 @@ def upload():
             return redirect(url_for('index'))
 
     db = get_db()
-    tracks = db.execute('SELECT * FROM uploads').fetchall()
-    return render_template('upload.html', tracks=tracks)
+    tracks = rows_to_dicts(db.execute('SELECT * FROM uploads').fetchall())
+    tracks_json = json.dumps(tracks)
+    return render_template('upload.html', tracks=tracks, tracks_json=tracks_json)
 
 @app.route('/logout')
 def logout():

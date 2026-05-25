@@ -21,6 +21,9 @@
         <nav class="nav-links" id="nav-links">
             <a href="#" class="active">Главная</a>
             <a href="{{ url_for('about') }}">О Нас</a>
+            {% if session.username %}
+                <a href="{{ url_for('upload') }}">Загрузить трек</a>
+            {% endif %}
         </nav>
     </aside>
 
@@ -35,7 +38,6 @@
                             {% if session.role == 'admin' %}
                                 <a href="{{ url_for('tickets') }}">Тикеты</a>
                             {% endif %}
-                            <a href="{{ url_for('upload') }}">Загрузить трек</a>
                             <a href="{{ url_for('logout') }}">Выйти</a>
                         </div>
                     </div>
@@ -49,7 +51,7 @@
         <div class="cards-container">
             {% for track in tracks %}
                 <div class="music-card" onclick="openTrackModal({{ loop.index0 }})">
-                    <img src="{% if track.cover_file %}{{ url_for('uploads', filename=track.cover_file) }}{% else %}{{ url_for('static', filename='default.png') }}{% endif %}" class="image-box">
+                    <img src="{% if track.cover_file %}{{ url_for('uploads', filename=track.cover_file) }}{% else %}{{ url_for('static', filename='logo.png') }}{% endif %}" class="image-box">
                     <h3>{{ track.name }}</h3>
                     <p>{{ track.author }}</p>
                 </div>
@@ -108,66 +110,65 @@
                 <h2 id="modal-title">Название трека</h2>
                 <p id="modal-artist" class="modal-artist">Исполнитель</p>
                 <div id="modal-badges" class="modal-badges"></div>
+                <button class="modal-btn modal-btn-header" onclick="playFromModal()">▶ Слушать</button>
             </div>
         </div>
         
         <div class="modal-body">
-            <div class="info-section">
-                <h3>Информация о треке</h3>
-                <div id="modal-info" class="track-details">
-                    <p>Загрузка...</p>
+            <div class="modal-body-grid">
+                <div class="modal-column">
+                    <div class="info-section">
+                        <h3>Информация о треке</h3>
+                        <div id="modal-info" class="track-details">
+                            <p>Загрузка...</p>
+                        </div>
+                    </div>
+                    
+                    <div id="cover-section" class="info-section" style="display: none;">
+                        <h3>Информация о кавере</h3>
+                        <div id="cover-info" class="track-details">
+                            <p><strong>Это кавер:</strong> <span id="is-cover-text">Да</span></p>
+                            <p id="original-info" style="display: none;">
+                                <strong>Оригинальное название:</strong> <span id="original-title"></span>
+                            </p>
+                            <p id="original-artist-info" style="display: none;">
+                                <strong>Оригинальный исполнитель:</strong> <span id="original-artist"></span>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="modal-column">
+                    <div id="genius-section" class="info-section" style="display: none;">
+                        <h3>🎵 Genius</h3>
+                        <div id="genius-info" class="track-details">
+                            <p id="genius-text">Загрузка...</p>
+                            <a id="genius-link" href="#" target="_blank" class="info-link">Перейти на Genius →</a>
+                        </div>
+                    </div>
+                    
+                    <div id="lastfm-section" class="info-section" style="display: none;">
+                        <h3>📊 Статистика (Last.fm)</h3>
+                        <div id="lastfm-info" class="track-details">
+                            <p id="lastfm-stats">Загрузка...</p>
+                        </div>
+                    </div>
+                    
+                    <div id="similar-section" class="info-section" style="display: none;">
+                        <h3>🎸 Похожие треки</h3>
+                        <div id="similar-tracks" class="similar-tracks-list">
+                            <p>Загрузка рекомендаций...</p>
+                        </div>
+                    </div>
                 </div>
             </div>
-            
-            <div id="cover-section" class="info-section" style="display: none;">
-                <h3>Информация о кавере</h3>
-                <div id="cover-info" class="track-details">
-                    <p><strong>Это кавер:</strong> <span id="is-cover-text">Да</span></p>
-                    <p id="original-info" style="display: none;">
-                        <strong>Оригинальное название:</strong> <span id="original-title"></span>
-                    </p>
-                    <p id="original-artist-info" style="display: none;">
-                        <strong>Оригинальный исполнитель:</strong> <span id="original-artist"></span>
-                    </p>
-                </div>
-            </div>
-            
-            <div id="genius-section" class="info-section" style="display: none;">
-                <h3>🎵 Genius</h3>
-                <div id="genius-info" class="track-details">
-                    <p id="genius-text">Загрузка...</p>
-                    <a id="genius-link" href="#" target="_blank" class="info-link">Перейти на Genius →</a>
-                </div>
-            </div>
-            
-            <div id="lastfm-section" class="info-section" style="display: none;">
-                <h3>📊 Статистика (Last.fm)</h3>
-                <div id="lastfm-info" class="track-details">
-                    <p id="lastfm-stats">Загрузка...</p>
-                </div>
-            </div>
-            
-            <div id="similar-section" class="info-section" style="display: none;">
-                <h3>🎸 Похожие треки</h3>
-                <div id="similar-tracks" class="similar-tracks-list">
-                    <p>Загрузка рекомендаций...</p>
-                </div>
-            </div>
-        </div>
-        
-        <div class="modal-footer">
-            <button class="modal-btn" onclick="playFromModal()">▶ Слушать</button>
         </div>
     </div>
 </div>
 
 <audio id="main-player" preload="none"></audio>
 <script>
-const tracks = [
-{% for track in tracks %}
-    {audio: '{{ track.audio_file }}', cover: '{{ track.cover_file }}', title: '{{ track.name }}', artist: '{{ track.author }}'},
-{% endfor %}
-];
+const tracks = {{ tracks | tojson | safe }};
 let currentIndex = -1;
 </script>
 
