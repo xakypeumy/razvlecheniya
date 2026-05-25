@@ -28,7 +28,6 @@
         <div class="header-simple">
             <h1>Твои треки</h1>
             <div class="header-controls">
-                <button class="player-toggle" id="player-toggle" onclick="togglePlayer()">▼</button>
                 {% if session.username %}
                     <div class="profile-menu">
                         <button class="profile-btn">{{ session.username }}</button>
@@ -59,6 +58,7 @@
     </main>
 
     <footer class="bottom-player">
+        <button class="player-toggle bottom-toggle" id="player-toggle" onclick="togglePlayer()">▼</button>
         <div class="player-controls-left">
             <button class="nav-btn" onclick="previousTrack()">⏮</button>
             <button class="play-circle" id="play-btn" onclick="togglePlayPause()">▶</button>
@@ -66,17 +66,22 @@
         </div>
 
         <div class="player-center-info">
-            <div class="track-now">
-                <img id="player-cover" src="{{ url_for('static', filename='default.png') }}" alt="Current" class="small-img">
+                <div class="track-now">
+                <img id="player-cover" src="{{ url_for('static', filename='logo_mini.png') }}" alt="Current" class="small-img">
                 <div class="text-info">
-                    <div id="player-title" class="t-title">Выберите трек</div>
-                    <div id="player-artist" class="t-sub">-</div>
+                    <div id="player-title" class="t-title">Название</div>
+                    <div id="player-artist" class="t-sub">Исполнитель</div>
                 </div>
             </div>
             <div class="timeline-wrap">
                 <div id="current-time" class="time">0:00</div>
                 <div class="bar-bg" id="timeline-bg"><div id="timeline-fill" class="bar-fill"></div></div>
                 <div id="duration" class="time">0:00</div>
+            </div>
+            <div class="mini-meta" id="mini-meta">
+                <span id="mini-current-time" class="mini-time">0:00</span>
+                <span class="mini-separator">/</span>
+                <span id="mini-duration" class="mini-time">0:00</span>
             </div>
         </div>
 

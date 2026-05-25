@@ -43,9 +43,14 @@
         <div class="cards-container">
             {% for ticket in tickets %}
                 <div class="music-card">
-                    <img src="{{ url_for('uploads', filename=ticket.cover_file) }}" class="image-box">
-                    <h3>{{ ticket.title }}</h3>
-                    <p>{{ ticket.artist }}</p>
+                    <form method="POST" action="{{ url_for('edit_ticket', ticket_id=ticket.id) }}" enctype="multipart/form-data" class="ticket-edit-form">
+                        <img src="{{ url_for('uploads', filename=ticket.cover_file) if ticket.cover_file else url_for('static', filename='default.png') }}" class="image-box">
+                        <input type="text" name="title" value="{{ ticket.title }}" class="ticket-input" required>
+                        <input type="text" name="artist" value="{{ ticket.artist }}" class="ticket-input" required>
+                        <label class="ticket-label">Новая обложка (опционально):</label>
+                        <input type="file" name="cover" accept="image/*" class="ticket-file-input">
+                        <button type="submit" class="btn">Сохранить</button>
+                    </form>
                     <audio controls>
                         <source src="{{ url_for('uploads', filename=ticket.audio_file) }}" type="audio/mpeg">
                     </audio>
@@ -65,4 +70,4 @@
 
 <script src="{{ url_for('static', filename='script.js') }}"></script>
 </body>
-</htm
+</html>

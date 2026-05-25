@@ -49,14 +49,25 @@
                 {% endif %}
             {% endwith %}
 
-            <form method="POST" enctype="multipart/form-data">
-                <input type="text" name="title" placeholder="Название трека" required>
-                <input type="text" name="artist" placeholder="Исполнитель" required>
-                <label>Аудио файл:</label>
-                <input type="file" name="audio" accept="audio/*" required>
-                <label>Обложка:</label>
-                <input type="file" name="cover" accept="image/*" required>
-                <button type="submit" class="btn upload-btn">Отправить на проверку</button>
+            <form id="upload-form" method="POST" enctype="multipart/form-data">
+                <div class="upload-step" id="audio-step">
+                    <label>Аудио файл:</label>
+                    <input id="audio-input" type="file" name="audio" accept="audio/*" required>
+                    <p class="upload-hint" id="upload-hint">Загрузите аудио файл, чтобы считать метаданные.</p>
+                </div>
+
+                <div class="upload-preview hidden" id="preview-card">
+                    <div class="preview-image-wrapper">
+                        <img id="preview-cover" src="{{ url_for('static', filename='default.png') }}" alt="Cover preview" class="preview-image">
+                    </div>
+                    <div class="preview-details">
+                        <input id="title-input" type="text" name="title" placeholder="Название трека" required>
+                        <input id="artist-input" type="text" name="artist" placeholder="Исполнитель" required>
+                        <label>Обложка (опционально):</label>
+                        <input type="file" name="cover" accept="image/*">
+                        <button type="submit" class="btn upload-btn">Отправить на проверку</button>
+                    </div>
+                </div>
             </form>
         </div>
     </main>
@@ -70,6 +81,7 @@ const tracks = [
 let currentIndex = -1;
 </script>
 
+<script src="https://cdn.jsdelivr.net/npm/jsmediatags@3.9.5/dist/jsmediatags.min.js"></script>
 <script src="{{ url_for('static', filename='script.js') }}"></script>
 </body>
 </html>

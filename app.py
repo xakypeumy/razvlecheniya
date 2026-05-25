@@ -611,6 +611,30 @@ def reject_ticket(ticket_id):
     flash('Трек отклонен!', 'success')
     return redirect(url_for('tickets'))
 
+@app.route('/edit_ticket/<int:ticket_id>', methods=['POST'])
+@login_required
+def edit_ticket(ticket_id):
+    if session.get('role') != 'admin':
+        flash('Доступ запрещен', 'error')
+        return redirect(url_for('index'))
+
+    title = request.form.get('title', '').strip()
+    artist = request.form.get('artist', '').strip()
+    cover = request.files.get('cover')
+
+    db = get_db()
+
+    if cover and cover.filename:
+        cover_filename = secure_filename(cover.filename)
+        cover_path = os.path.join(app.config['UPLOAD_FOLDER'], cover_filename)
+        cover.save(cover_path)
+        db.execute('UPDATE tickets SET cover_file = ? WHERE id = ?', (cover_filename, ticket_id))
+
+    db.execute('UPDATE tickets SET title = ?, artist = ? WHERE id = ?', (title, artist, ticket_id))
+    db.commit()
+    flash('Данные тикета обновлены!', 'success')
+    return redirect(url_for('tickets'))
+
 @app.route('/about')
 def about():
     db = get_db()
@@ -621,18 +645,21 @@ def about():
 @login_required
 def upload():
     if request.method == 'POST':
-        title = request.form['title']
-        artist = request.form['artist']
-        audio = request.files['audio']
-        cover = request.files['cover']
+        title = request.form.get('title', '').strip()
+        artist = request.form.get('artist', '').strip()
+        audio = request.files.get('audio')
+        cover = request.files.get('cover')
 
-        if audio and cover:
+        if audio:
             audio_filename = secure_filename(audio.filename)
-            cover_filename = secure_filename(cover.filename)
-            audio_path = os.path.join('uploads', audio_filename)
-            cover_path = os.path.join('uploads', cover_filename)
+            audio_path = os.path.join(app.config['UPLOAD_FOLDER'], audio_filename)
             audio.save(audio_path)
-            cover.save(cover_path)
+
+            cover_filename = None
+            if cover and cover.filename:
+                cover_filename = secure_filename(cover.filename)
+                cover_path = os.path.join(app.config['UPLOAD_FOLDER'], cover_filename)
+                cover.save(cover_path)
 
             db = get_db()
             db.execute('INSERT INTO tickets (user_id, title, artist, audio_file, cover_file) VALUES (?, ?, ?, ?, ?)',
@@ -641,6 +668,7 @@ def upload():
 
             flash('Трек отправлен на проверку!', 'success')
             return redirect(url_for('index'))
+
     db = get_db()
     tracks = db.execute('SELECT * FROM uploads').fetchall()
     return render_template('upload.html', tracks=tracks)

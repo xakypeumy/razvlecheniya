@@ -28,7 +28,6 @@
         <div class="header-simple">
             <h1>О нашей команде</h1>
             <div class="header-controls">
-                <button class="player-toggle" id="player-toggle" onclick="togglePlayer()">▼</button>
                 {% if session.username %}
                     <div class="profile-menu">
                         <button class="profile-btn">{{ session.username }}</button>
@@ -73,6 +72,7 @@
         </div>
     </main>
     <footer class="bottom-player">
+        <button class="player-toggle bottom-toggle" id="player-toggle" onclick="togglePlayer()">▼</button>
         <div class="player-controls-left">
             <button class="nav-btn">⏮</button>
             <button class="play-circle">▶</button>
@@ -81,12 +81,12 @@
 
         <div class="player-center-info">
             <div class="track-now">
-                <img src="file:///C:/Users/user/Pictures/slungus.png" alt="Current" class="small-img">
-                <div class="text-info">
-                    <div class="t-title">1 muzika</div>
-                    <div class="t-sub">sozdatel1</div>
+                    <img id="player-cover" src="{{ url_for('static', filename='logo_mini.png') }}" alt="Current" class="small-img">
+                    <div class="text-info">
+                        <div id="player-title" class="t-title">Название</div>
+                        <div id="player-artist" class="t-sub">Исполнитель</div>
+                    </div>
                 </div>
-            </div>
             <div class="timeline-wrap">
                 <div class="time">0:00</div>
                 <div class="bar-bg"><div class="bar-fill"></div></div>

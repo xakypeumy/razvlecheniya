@@ -27,31 +27,151 @@ function togglePlayer() {
     const appLayout = document.querySelector('.app-layout');
     const playerToggle = document.getElementById('player-toggle');
 
-    appLayout.classList.toggle('player-hidden');
+    appLayout.classList.toggle('player-minimized');
 
-    if (appLayout.classList.contains('player-hidden')) {
+    if (appLayout.classList.contains('player-minimized')) {
         playerToggle.textContent = '▲';
+        playerToggle.title = 'Развернуть плеер';
     } else {
         playerToggle.textContent = '▼';
+        playerToggle.title = 'Свернуть плеер';
     }
 
     // Save player state
-    localStorage.setItem('playerHidden', appLayout.classList.contains('player-hidden'));
+    localStorage.setItem('playerMinimized', appLayout.classList.contains('player-minimized'));
+}
+
+function initUploadMetadata() {
+    const audioInput = document.getElementById('audio-input');
+    const previewCard = document.getElementById('preview-card');
+    const previewCover = document.getElementById('preview-cover');
+    const titleInput = document.getElementById('title-input');
+    const artistInput = document.getElementById('artist-input');
+    const uploadHint = document.getElementById('upload-hint');
+
+    if (!audioInput) {
+        return;
+    }
+
+    audioInput.addEventListener('change', (event) => {
+        const file = event.target.files[0];
+        if (!file) {
+            return;
+        }
+
+        previewCard.classList.remove('hidden');
+        uploadHint.textContent = 'Сканируем метаданные...';
+        titleInput.value = '';
+        artistInput.value = '';
+        previewCover.src = '/static/default.png';
+
+        const setFallbackFromFilename = () => {
+            const filename = file.name.replace(/\.[^/.]+$/, '').trim();
+            const pipeParts = filename.split(/\s*\|\s*/).map(part => part.trim()).filter(Boolean);
+
+            if (pipeParts.length >= 4 && /^\d+$/.test(pipeParts[1])) {
+                titleInput.value = titleInput.value || pipeParts[2];
+                artistInput.value = artistInput.value || pipeParts[3];
+                return;
+            }
+
+            if (pipeParts.length >= 3) {
+                // если есть по крайней мере 3 части, считаем, что последняя до альбома - исполнитель
+                titleInput.value = titleInput.value || pipeParts[pipeParts.length - 2];
+                artistInput.value = artistInput.value || pipeParts[pipeParts.length - 1];
+                return;
+            }
+
+            const patterns = [
+                /^(?<artist>.+?)\s*-\s*(?<title>.+)$/,
+                /^(?<artist>.+?)\s*\((?<title>.+?)\)$/,
+                /^(?<artist>.+?)\s+–\s+(?<title>.+)$/,
+                /^(?<title>.+?)\s+–\s+(?<artist>.+)$/
+            ];
+
+            for (const pattern of patterns) {
+                const match = filename.match(pattern);
+                if (match && match.groups) {
+                    artistInput.value = artistInput.value || match.groups.artist.trim();
+                    titleInput.value = titleInput.value || match.groups.title.trim();
+                    return;
+                }
+            }
+
+            const fallbackParts = filename.split(/\s*-\s*/);
+            if (fallbackParts.length >= 2) {
+                artistInput.value = artistInput.value || fallbackParts[0].trim();
+                titleInput.value = titleInput.value || fallbackParts.slice(1).join(' - ').trim();
+            } else {
+                titleInput.value = titleInput.value || filename;
+            }
+        };
+
+        const readTagValue = (tags, keys) => {
+            for (const key of keys) {
+                const value = tags[key];
+                if (!value) continue;
+                if (typeof value === 'string') {
+                    return value.trim();
+                }
+                if (value.data) {
+                    return String(value.data).trim();
+                }
+                if (value.text) {
+                    return String(value.text).trim();
+                }
+            }
+            return '';
+        };
+
+        if (window.jsmediatags) {
+            jsmediatags.read(file, {
+                onSuccess: function(tag) {
+                    const tags = tag.tags || {};
+                    titleInput.value = readTagValue(tags, ['title', 'TIT2', 'TITLE']) || titleInput.value || '';
+                    artistInput.value = readTagValue(tags, ['artist', 'TPE1', 'ARTIST']) || artistInput.value || '';
+
+                    if (tags.picture) {
+                        const picture = tags.picture;
+                        let base64String = '';
+                        for (let i = 0; i < picture.data.length; i++) {
+                            base64String += String.fromCharCode(picture.data[i]);
+                        }
+                        const imageBase64 = btoa(base64String);
+                        previewCover.src = `data:${picture.format};base64,${imageBase64}`;
+                    }
+
+                    setFallbackFromFilename();
+                    uploadHint.textContent = 'Проверка завершена. Отредактируйте данные при необходимости.';
+                },
+                onError: function(error) {
+                    console.error('jsmediatags error:', error);
+                    setFallbackFromFilename();
+                    uploadHint.textContent = 'Не удалось прочитать метаданные. Использованы данные из имени файла.';
+                }
+            });
+        } else {
+            setFallbackFromFilename();
+            uploadHint.textContent = 'Метаданные недоступны. Заполните поля вручную.';
+        }
+    });
 }
 
 // Profile dropdown toggle
 document.addEventListener('DOMContentLoaded', function() {
     // Restore UI states
     const sidebarCollapsed = localStorage.getItem('sidebarCollapsed') === 'true';
-    const playerHidden = localStorage.getItem('playerHidden') === 'true';
+    const playerMinimized = localStorage.getItem('playerMinimized') === 'true';
 
     if (sidebarCollapsed) {
         toggleSidebar();
     }
 
-    if (playerHidden) {
+    if (playerMinimized) {
         togglePlayer();
     }
+
+    initUploadMetadata();
 
     // Restore player state
     const savedIndex = localStorage.getItem('currentIndex');
@@ -178,7 +298,11 @@ function playTrack(index) {
     player.volume = parseFloat(localStorage.getItem('volume')) || 0.5;
 
     player.addEventListener('loadedmetadata', () => {
-        document.getElementById('duration').textContent = formatTime(player.duration);
+        const durationEl = document.getElementById('duration');
+        const miniDurationEl = document.getElementById('mini-duration');
+        const formattedDuration = formatTime(player.duration);
+        if (durationEl) durationEl.textContent = formattedDuration;
+        if (miniDurationEl) miniDurationEl.textContent = formattedDuration;
         const savedTime = localStorage.getItem('currentTime');
         if (savedTime) {
             player.currentTime = parseFloat(savedTime);
@@ -187,10 +311,13 @@ function playTrack(index) {
 
     player.addEventListener('timeupdate', () => {
         const currentTime = document.getElementById('current-time');
+        const miniCurrentTime = document.getElementById('mini-current-time');
         const timelineFill = document.getElementById('timeline-fill');
-        currentTime.textContent = formatTime(player.currentTime);
+        const formattedTime = formatTime(player.currentTime);
+        if (currentTime) currentTime.textContent = formattedTime;
+        if (miniCurrentTime) miniCurrentTime.textContent = formattedTime;
         const progress = (player.currentTime / player.duration) * 100;
-        timelineFill.style.width = progress + '%';
+        if (timelineFill) timelineFill.style.width = progress + '%';
         localStorage.setItem('currentTime', player.currentTime);
     });
 
