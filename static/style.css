@@ -707,9 +707,9 @@ body {
     background-color: var(--bg-card);
     border-radius: var(--radius);
     box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
-    max-width: 900px;
-    width: 90%;
-    max-height: 80vh;
+    max-width: 1000px;
+    width: 88%;
+    max-height: 90vh;
     overflow-y: auto;
     z-index: 1001;
     animation: slideIn 0.3s ease-out;
@@ -879,8 +879,8 @@ body {
 
 .modal-body-grid {
     display: grid;
-    grid-template-columns: 1.2fr 0.8fr;
-    gap: 24px;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
 }
 
 .modal-column {
@@ -1076,7 +1076,7 @@ body {
     font-size: 14px;
     line-height: 1.6;
     white-space: pre-wrap;
-    max-height: 300px;
+    max-height: 380px;
     overflow-y: auto;
     border: 1px solid rgba(122, 162, 247, 0.2);
 }

@@ -664,37 +664,30 @@ function displayTrackInfo(data, trackIndex) {
         coverSection.style.display = 'none';
     }
     
-    // Показываем текст песни
+    // Показываем текст песни или сообщение об отсутствии
+    geniusSection.style.display = 'block';
+    let geniusHtml = '';
     if (data.lyrics_text) {
-        geniusSection.style.display = 'block';
-        
-        let geniusHtml = `<h3>Текст песни</h3>`;
+        geniusHtml += `<h3>Текст песни</h3>`;
         geniusHtml += `<div class="lyrics-text">${data.lyrics_text.replace(/\n/g, '<br>')}</div>`;
-        
         if (data.lyrics_url) {
             geniusHtml += `<p><a href="${data.lyrics_url}" target="_blank" class="info-link">Поиск в Google →</a></p>`;
         }
         if (data.genius_url) {
             geniusHtml += `<p><a href="${data.genius_url}" target="_blank" class="info-link">Перейти на Genius →</a></p>`;
         }
-        
-        document.getElementById('genius-info').innerHTML = geniusHtml;
     } else if (data.genius_url) {
-        geniusSection.style.display = 'block';
-        
-        let geniusHtml = `<h3>Информация о песне</h3>`;
+        geniusHtml += `<h3>Информация о песне</h3>`;
         geniusHtml += `<p><a href="${data.genius_url}" target="_blank" class="info-link">Перейти на Genius →</a></p>`;
-        
-        document.getElementById('genius-info').innerHTML = geniusHtml;
     } else {
-        geniusSection.style.display = 'none';
+        geniusHtml += `<h3>Текст песни</h3><p>Информация не найдена.</p>`;
     }
+    document.getElementById('genius-info').innerHTML = geniusHtml;
     
-    // Показываем статистику Last.fm
-    if (data.lastfm) {
-        lastfmSection.style.display = 'block';
-        
-        let lastfmHtml = '';
+    // Показываем статистику Last.fm или сообщение об отсутствии
+    lastfmSection.style.display = 'block';
+    let lastfmHtml = '';
+    if (data.lastfm && (data.lastfm.playcount || data.lastfm.listeners || data.lastfm.url || (data.lastfm.tags && data.lastfm.tags.length > 0))) {
         if (data.lastfm.playcount) {
             lastfmHtml += `<p><strong>Прослушиваний:</strong> <span>${formatNumber(parseInt(data.lastfm.playcount))}</span></p>`;
         }
@@ -711,16 +704,14 @@ function displayTrackInfo(data, trackIndex) {
             });
             lastfmHtml += `</div>`;
         }
-        
-        document.getElementById('lastfm-info').innerHTML = lastfmHtml;
     } else {
-        lastfmSection.style.display = 'none';
+        lastfmHtml = `<p>Статистика не найдена.</p>`;
     }
+    document.getElementById('lastfm-info').innerHTML = lastfmHtml;
     
-    // Показываем похожие треки
+    // Показываем похожие треки или сообщение об отсутствии
+    similarSection.style.display = 'block';
     if (data.similar && data.similar.length > 0) {
-        similarSection.style.display = 'block';
-        
         let similarHtml = '';
         data.similar.slice(0, 8).forEach(track => {
             similarHtml += `
@@ -733,10 +724,9 @@ function displayTrackInfo(data, trackIndex) {
                 </div>
             `;
         });
-        
         document.getElementById('similar-tracks').innerHTML = similarHtml;
     } else {
-        similarSection.style.display = 'none';
+        document.getElementById('similar-tracks').innerHTML = `<p>Похожие треки не найдены.</p>`;
     }
 }
 
