@@ -54,6 +54,8 @@
                     <img src="{% if track.cover_file %}{{ url_for('uploads', filename=track.cover_file) }}{% else %}{{ url_for('static', filename='logo.png') }}{% endif %}" class="image-box">
                     <h3>{{ track.name }}</h3>
                     <p>{{ track.author }}</p>
+
+                    
                 </div>
             {% endfor %}
         </div>
@@ -112,9 +114,34 @@
                 <div id="modal-badges" class="modal-badges"></div>
                 <button class="modal-btn modal-btn-header" onclick="playFromModal()">▶ Слушать</button>
             </div>
+
+            {% if session.role == 'admin' %}
+            <div class="modal-admin-menu">
+                <button id="admin-menu-btn" class="admin-dots" onclick="toggleAdminMenu(event)">⋮</button>
+                <div id="admin-menu" class="admin-menu" style="display:none;">
+                    <button type="button" onclick="showEditForm(event)" class="admin-menu-item">Редактировать</button>
+                    <button type="button" onclick="confirmDelete(event)" class="admin-menu-item delete">Удалить</button>
+                </div>
+            </div>
+            {% endif %}
         </div>
         
         <div class="modal-body">
+            {% if session.role == 'admin' %}
+            <div id="admin-edit-section" class="info-section" style="display:none; margin-bottom:12px;">
+                <h3>Редактировать трек</h3>
+                <form id="admin-edit-form" method="POST" enctype="multipart/form-data">
+                    <input type="text" name="title" id="admin-title" class="ticket-input" required placeholder="Название" style="width:100%; margin-bottom:6px;">
+                    <input type="text" name="author" id="admin-author" class="ticket-input" required placeholder="Исполнитель" style="width:100%; margin-bottom:6px;">
+                    <label style="font-size:0.9em;">Новая обложка (опционально):</label>
+                    <input type="file" name="cover" id="admin-cover" accept="image/*" class="ticket-file-input" style="display:block; margin-bottom:8px;">
+                    <div>
+                        <button type="submit" class="btn">Сохранить</button>
+                        <button type="button" class="btn" onclick="hideEditForm(event)" style="margin-left:6px;">Отмена</button>
+                    </div>
+                </form>
+            </div>
+            {% endif %}
             <div class="modal-body-grid">
                 <div class="modal-column">
                     <div class="info-section">

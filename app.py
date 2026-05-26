@@ -684,6 +684,63 @@ def logout():
     flash('Вы вышли из системы', 'info')
     return redirect(url_for('login'))
 
+
+@app.route('/edit_upload/<int:upload_id>', methods=['POST'])
+@login_required
+def edit_upload(upload_id):
+    if session.get('role') != 'admin':
+        flash('Доступ запрещен', 'error')
+        return redirect(url_for('index'))
+
+    title = request.form.get('title', '').strip()
+    author = request.form.get('author', '').strip()
+    cover = request.files.get('cover')
+
+    db = get_db()
+
+    if cover and cover.filename:
+        cover_filename = secure_filename(cover.filename)
+        cover_path = os.path.join(app.config['UPLOAD_FOLDER'], cover_filename)
+        try:
+            cover.save(cover_path)
+            db.execute('UPDATE uploads SET cover_file = ? WHERE id = ?', (cover_filename, upload_id))
+        except Exception as e:
+            print(f"Error saving cover: {e}")
+
+    db.execute('UPDATE uploads SET name = ?, author = ? WHERE id = ?', (title, author, upload_id))
+    db.commit()
+    flash('Данные трека обновлены!', 'success')
+    return redirect(url_for('index'))
+
+
+@app.route('/delete_upload/<int:upload_id>', methods=['POST'])
+@login_required
+def delete_upload(upload_id):
+    if session.get('role') != 'admin':
+        flash('Доступ запрещен', 'error')
+        return redirect(url_for('index'))
+
+    db = get_db()
+    upload = db.execute('SELECT * FROM uploads WHERE id = ?', (upload_id,)).fetchone()
+    if upload:
+        audio_file = upload['audio_file']
+        cover_file = upload['cover_file']
+
+        for f in (audio_file, cover_file):
+            if f:
+                path = os.path.join(app.config['UPLOAD_FOLDER'], f)
+                try:
+                    if os.path.exists(path):
+                        os.remove(path)
+                except Exception as e:
+                    print(f"Error deleting file {path}: {e}")
+
+        db.execute('DELETE FROM uploads WHERE id = ?', (upload_id,))
+        db.commit()
+        flash('Трек удалён!', 'success')
+
+    return redirect(url_for('index'))
+
 # =========
 
 if __name__ == "__main__":

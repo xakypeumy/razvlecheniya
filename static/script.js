@@ -498,10 +498,79 @@ function openTrackModal(index) {
     
     // Показываем модальное окно
     modal.classList.add('active');
+    // Store track id for admin actions
+    if (track.id !== undefined) {
+        modal.dataset.trackId = track.id;
+    } else if (track.ID !== undefined) {
+        modal.dataset.trackId = track.ID;
+    } else {
+        modal.dataset.trackId = '';
+    }
     
     // Запрашиваем информацию о треке
     fetchTrackInfo(artist, title, index);
 }
+
+// ===== Admin menu and actions
+function toggleAdminMenu(e) {
+    e.stopPropagation();
+    const menu = document.getElementById('admin-menu');
+    if (!menu) return;
+    menu.style.display = menu.style.display === 'block' ? 'none' : 'block';
+}
+
+function showEditForm(e) {
+    e.stopPropagation();
+    const modal = document.getElementById('track-modal');
+    const title = document.getElementById('modal-title').textContent;
+    const artist = document.getElementById('modal-artist').textContent;
+    const editSection = document.getElementById('admin-edit-section');
+    const editForm = document.getElementById('admin-edit-form');
+    if (!modal || !editSection || !editForm) return;
+
+    // populate fields
+    document.getElementById('admin-title').value = title;
+    document.getElementById('admin-author').value = artist;
+
+    // set form action to include upload id
+    const uploadId = modal.dataset.trackId || '';
+    editForm.action = `/edit_upload/${uploadId}`;
+
+    editSection.style.display = 'block';
+    // hide menu
+    const menu = document.getElementById('admin-menu'); if (menu) menu.style.display = 'none';
+}
+
+function hideEditForm(e) {
+    e.stopPropagation();
+    const editSection = document.getElementById('admin-edit-section');
+    if (editSection) editSection.style.display = 'none';
+}
+
+function confirmDelete(e) {
+    e.stopPropagation();
+    const modal = document.getElementById('track-modal');
+    if (!modal) return;
+    const uploadId = modal.dataset.trackId || '';
+    const ok = confirm('Вы уверены, что хотите удалить этот трек? Это действие необратимо.');
+    if (!ok) return;
+
+    // create and submit a form to POST delete
+    const form = document.createElement('form');
+    form.method = 'POST';
+    form.action = `/delete_upload/${uploadId}`;
+    document.body.appendChild(form);
+    form.submit();
+}
+
+// Close admin menu if clicking outside
+window.addEventListener('click', function(e) {
+    const adminMenu = document.getElementById('admin-menu');
+    if (!adminMenu) return;
+    if (!e.target.closest('.modal-admin-menu')) {
+        adminMenu.style.display = 'none';
+    }
+});
 
 // Закрытие модального окна
 function closeTrackModal() {

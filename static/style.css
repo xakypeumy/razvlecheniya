@@ -750,6 +750,86 @@ body {
     border-radius: var(--radius) var(--radius) 0 0;
 }
 
+/* Admin menu in modal (three vertical dots + dropdown) */
+.modal-admin-menu {
+    position: relative;
+    display: flex;
+    align-items: flex-start;
+}
+
+.admin-dots {
+    background: transparent;
+    border: none;
+    color: var(--text-gray);
+    font-size: 22px;
+    cursor: pointer;
+    padding: 6px 10px;
+    border-radius: 8px;
+    transition: 0.15s;
+}
+
+.admin-dots:hover {
+    background-color: rgba(122,162,247,0.06);
+    color: var(--text-white);
+}
+
+.admin-menu {
+    position: absolute;
+    top: 36px;
+    right: 0;
+    background-color: var(--bg-card);
+    border: 1px solid rgba(122,162,247,0.08);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.4);
+    border-radius: 10px;
+    z-index: 2000;
+    min-width: 160px;
+    padding: 8px;
+}
+
+.admin-menu-item {
+    display: block;
+    width: 100%;
+    text-align: left;
+    background: transparent;
+    border: none;
+    color: var(--text-white);
+    padding: 10px 12px;
+    border-radius: 8px;
+    font-size: 14px;
+    cursor: pointer;
+}
+
+.admin-menu-item:hover { background-color: rgba(122,162,247,0.06); color: var(--accent); }
+
+.admin-menu-item.delete { color: #ffb3b3; }
+
+/* Admin edit section styling: align with info-section and form controls */
+#admin-edit-section {
+    background-color: rgba(25,28,36,0.5);
+    padding: 14px;
+    border-radius: 12px;
+    border-left: 3px solid var(--accent);
+}
+
+#admin-edit-form .ticket-input {
+    background-color: var(--bg-side);
+    border: 1px solid #444;
+    color: var(--text-white);
+    padding: 10px 12px;
+    border-radius: 10px;
+}
+
+#admin-edit-form .btn {
+    padding: 8px 14px;
+    border-radius: 10px;
+    font-size: 14px;
+}
+
+@media (max-width: 720px) {
+    .admin-menu { right: 8px; left: auto; min-width: 140px; }
+    .modal-header { padding: 20px; gap: 14px; }
+}
+
 .modal-cover {
     width: 150px;
     height: 150px;
