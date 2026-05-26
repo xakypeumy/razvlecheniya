@@ -400,6 +400,29 @@ body {
     color: var(--text-white);
 }
 
+.consent-label {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 14px;
+    color: var(--text-gray);
+    margin-bottom: 14px;
+}
+
+.consent-label input {
+    width: 16px;
+    height: 16px;
+}
+
+.consent-label a {
+    color: var(--accent);
+    text-decoration: none;
+}
+
+.consent-label a:hover {
+    text-decoration: underline;
+}
+
 .form-container input::placeholder {
     color: var(--text-gray);
 }

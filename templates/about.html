@@ -21,6 +21,7 @@
         <nav class="nav-links" id="nav-links">
             <a href="{{ url_for('index') }}">Главная</a>
             <a href="#" class="active">О Нас</a>
+            <a href="{{ url_for('user_agreement') }}">Пользовательское соглашение</a>
             {% if session.username %}
                 <a href="{{ url_for('upload') }}">Загрузить трек</a>
             {% endif %}

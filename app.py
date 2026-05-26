@@ -565,6 +565,11 @@ def register():
         username = request.form['username']
         password = request.form['password']
         email = request.form['email']
+        consent = request.form.get('consent')
+
+        if not consent:
+            flash('Необходимо дать согласие с пользовательским соглашением.', 'error')
+            return render_template('register.html')
 
         if user_exists(username):
             flash('Пользователь с таким логином уже существует!', 'error')
@@ -576,6 +581,10 @@ def register():
         return redirect(url_for('login'))
 
     return render_template('register.html')
+
+@app.route('/agreement')
+def user_agreement():
+    return render_template('user_agreement.html')
 
 @app.route('/tickets')
 @login_required

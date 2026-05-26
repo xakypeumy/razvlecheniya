@@ -15,6 +15,7 @@
         <nav class="nav-links">
             <a href="{{ url_for('index') }}">Главная</a>
             <a href="{{ url_for('about') }}">О Нас</a>
+            <a href="{{ url_for('user_agreement') }}">Пользовательское соглашение</a>
         </nav>
     </aside>
 
@@ -39,6 +40,10 @@
                 <input type="text" name="username" placeholder="Имя пользователя" required>
                 <input type="password" name="password" placeholder="Пароль" required>
                 <input type="email" name="email" placeholder="Адрес Эл. Почты" required>
+                <label class="consent-label">
+                    <input type="checkbox" name="consent" required>
+                    Я согласен с <a href="{{ url_for('user_agreement') }}" target="_blank">Пользовательским соглашением</a>
+                </label>
                 <button type="submit" class="btn register-btn">Зарегистрироваться</button>
             </form>
         </div>
